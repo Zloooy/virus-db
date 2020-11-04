@@ -9,6 +9,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
 @Service
 public class VirusService implements IVirusService{
     @Autowired
@@ -18,6 +25,20 @@ public class VirusService implements IVirusService{
     public Page<Virus> findPaginated(int page, int size) {
         Pageable paging = PageRequest.of(page,size, Sort.by("name"));
         return repository.findAll(paging);
+    }
+
+    @Override
+    public List<Virus> getAllViruses() {
+        ArrayList<Virus> result = new ArrayList<>();
+        repository.findAll().forEach(result::add);
+        return result;
+    }
+
+    @Override
+    public List<Map.Entry<Long, String>> getVirusNames() {
+        return StreamSupport.stream(repository.findAll().spliterator(), false)
+                .map((Virus v)->new AbstractMap.SimpleEntry<>(v.getId(), v.getName()))
+        .collect(Collectors.toList());
     }
 
     @Override
